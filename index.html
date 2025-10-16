@@ -4,110 +4,38 @@
     <meta charset="utf-8">
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <title>Unity Web Player | Teenpati</title>
-    <link rel="shortcut icon" href="TemplateData/favicon.ico">
-    <link rel="stylesheet" href="TemplateData/style.css">
-    <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, user-scalable=no, shrink-to-fit=yes">
-    <style>
-      html, body {
-        margin: 0;
-        padding: 0;
-        overflow: hidden;
-        height: 100%;
-        width: 100%;
-        background: #000;
-      }
-      #unity-container {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100vw;
-        height: 100vh;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-      }
-      canvas {
-        width: 100vw !important;
-        height: 100vh !important;
-      }
-      /* Force horizontal (landscape) orientation */
-      @media screen and (orientation: portrait) {
-        body::before {
-          content: "Please rotate your device to landscape mode";
-          color: white;
-          position: absolute;
-          top: 50%;
-          left: 50%;
-          transform: translate(-50%, -50%);
-          text-align: center;
-          font-size: 1.5em;
-          font-family: sans-serif;
-        }
-        #unity-container, canvas {
-          display: none !important;
-        }
-      }
-    </style>
   </head>
-  <body>
-    <div id="unity-container">
-      <canvas id="unity-canvas" tabindex="-1"></canvas>
-      <div id="unity-loading-bar">
-        <div id="unity-logo"></div>
-        <div id="unity-progress-bar-empty">
-          <div id="unity-progress-bar-full"></div>
-        </div>
-      </div>
-      <div id="unity-warning"></div>
-    </div>
-
+  <body style="text-align: center; padding: 0; border: 0; margin: 0;">
+    <canvas id="unity-canvas" width=1920 height=1080 tabindex="-1" style="width: 1920px; height: 1080px; background: #231F20"></canvas>
+    <script src="Build/WebGLBuild.loader.js"></script>
     <script>
-      var canvas = document.querySelector("#unity-canvas");
+      if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
+        // Mobile device style: fill the whole browser client area with the game canvas:
+        var meta = document.createElement('meta');
+        meta.name = 'viewport';
+        meta.content = 'width=device-width, height=device-height, initial-scale=1.0, user-scalable=no, shrink-to-fit=yes';
+        document.getElementsByTagName('head')[0].appendChild(meta);
 
-      function unityShowBanner(msg, type) {
-        var warningBanner = document.querySelector("#unity-warning");
-        warningBanner.style.display = 'block';
-        warningBanner.innerHTML = msg;
-        warningBanner.style.background = type == 'error' ? 'red' : 'yellow';
+        var canvas = document.querySelector("#unity-canvas");
+        canvas.style.width = "100%";
+        canvas.style.height = "100%";
+        canvas.style.position = "fixed";
+
+        document.body.style.textAlign = "left";
       }
 
-      var buildUrl = "Build";
-      var loaderUrl = buildUrl + "/WebGLBuild.loader.js";
-      var config = {
-        dataUrl: buildUrl + "/WebGLBuild.data.br",
-        frameworkUrl: buildUrl + "/WebGLBuild.framework.js.br",
-        codeUrl: buildUrl + "/WebGLBuild.wasm.br",
+      createUnityInstance(document.querySelector("#unity-canvas"), {
+        arguments: [],
+        dataUrl: "Build/WebGLBuild.data",
+        frameworkUrl: "Build/WebGLBuild.framework.js",
+        codeUrl: "Build/WebGLBuild.wasm",
         streamingAssetsUrl: "StreamingAssets",
         companyName: "DefaultCompany",
         productName: "Teenpati",
         productVersion: "1.0.2",
-        showBanner: unityShowBanner
-      };
-
-      // Always fullscreen
-      canvas.style.width = "100vw";
-      canvas.style.height = "100vh";
-
-      document.querySelector("#unity-loading-bar").style.display = "block";
-
-      var script = document.createElement("script");
-      script.src = loaderUrl;
-      script.onload = () => {
-        createUnityInstance(canvas, config, (progress) => {
-          document.querySelector("#unity-progress-bar-full").style.width = 100 * progress + "%";
-        }).then((unityInstance) => {
-          document.querySelector("#unity-loading-bar").style.display = "none";
-          // Try to set fullscreen automatically
-          try {
-            unityInstance.SetFullscreen(1);
-          } catch (e) {
-            console.warn("Fullscreen request failed:", e);
-          }
-        }).catch((message) => {
-          alert(message);
-        });
-      };
-      document.body.appendChild(script);
+        // matchWebGLToCanvasSize: false, // Uncomment this to separately control WebGL canvas render size and DOM element size.
+        // devicePixelRatio: 1, // Uncomment this to override low DPI rendering on high DPI displays.
+      });
     </script>
   </body>
 </html>
